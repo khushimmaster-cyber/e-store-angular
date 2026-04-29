@@ -20,7 +20,13 @@ export class Cart {
   cartItems: any[] = [];
   total: number = 0;
   userId = sessionStorage.getItem('id');
-  imageUrl = 'http://localhost:3000/uploads/';
+  private readonly baseUrl = 'https://moska-backend-1.onrender.com/uploads/';
+
+  resolveImage(pic: string): string {
+    if (!pic || pic === 'no-image.jpg') return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100';
+    if (pic.startsWith('http')) return pic;
+    return this.baseUrl + pic;
+  }
   couponCode: string = '';
   discount: number = 0;
   finalTotal: number = 0;

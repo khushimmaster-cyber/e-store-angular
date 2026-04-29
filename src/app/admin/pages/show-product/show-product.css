@@ -307,3 +307,19 @@
   .search-bar { max-width: 100%; }
   .image-thumb:hover { transform: scale(1.6); }
 }
+
+@media (max-width: 500px) {
+  .show-product-container { padding: 10px 8px; }
+  .page-header { padding: 14px; border-radius: 12px; }
+  .page-header h2 { font-size: 1.2rem; }
+  .summary-stats { grid-template-columns: 1fr; gap: 12px; }
+  .stat-card { padding: 16px; }
+  .stat-card p { font-size: 1.4rem; }
+  .image-thumb { width: 44px; height: 44px; border-radius: 8px; }
+  .image-thumb:hover { transform: scale(1.4); }
+  .products-table th,
+  .products-table td { padding: 10px 12px; font-size: 0.78rem; }
+  .btn-action { width: 34px; height: 34px; font-size: 0.85rem; }
+  .category-badge { font-size: 0.75rem; padding: 4px 10px; }
+  .price { font-size: 0.95rem; }
+}

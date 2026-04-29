@@ -646,7 +646,6 @@ body > * {
 
 :host {
   display: block;
-  zoom: 1.15;
 }
 
 /* ===== HEADER (same as home) ===== */

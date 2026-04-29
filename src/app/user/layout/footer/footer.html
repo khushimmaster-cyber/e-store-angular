@@ -1,70 +1,137 @@
+<!-- TOP WAVE -->
+<div class="footer-wave">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#1e1612"/>
+  </svg>
+</div>
+
 <footer class="moska-footer">
-    <div class="footer-grid">
-        <!-- brand column -->
-        <div class="footer-brand">
-            <div class="logo">MOSKA</div>
-            <p>Objects that live gracefully between function and poetry. Curated from quiet ateliers across the world.
-            </p>
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-pinterest"></i></a>
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <!-- <a href="#"><i class="fab fa-x-twitter"></i></a> -->
-            </div>
-        </div>
 
-        <!-- shop column -->
-        <div class="footer-col">
-            <h4>shop</h4>
-            <ul>
-                <li><a href="#">new arrivals</a></li>
-                <li><a href="#">jewellery</a></li>
-                <li><a href="#">electronics</a></li>
-                <li><a href="#">textiles</a></li>
-                <li><a href="#">fragrance</a></li>
-                <li><a href="#">gift cards</a></li>
-            </ul>
-        </div>
+  <!-- MAIN GRID -->
+  <div class="footer-inner">
 
-        <!-- support column -->
-        <div class="footer-col">
-            <h4>support</h4>
-            <ul>
-                <li><a href="#">contact us</a></li>
-                <li><a href="#">shipping & returns</a></li>
-                <li><a href="#">care guide</a></li>
-                <li><a href="#">faq</a></li>
-                <li><a href="#">track order</a></li>
-            </ul>
-        </div>
+    <!-- BRAND -->
+    <div class="footer-brand">
+      <div class="footer-logo">MOSKA</div>
+      <p class="footer-tagline">Objects that live gracefully between function and poetry. Curated from quiet ateliers across the world.</p>
 
-        <!-- newsletter column -->
-        <div class="footer-col">
-            <h4>newsletter</h4>
-            <p style="color: #D4C4B5; font-size: 14px; margin-bottom: 15px;">Subscribe to receive stories, collections,
-                and slow inspirations.</p>
-            <div class="newsletter-form">
-                <input type="email" placeholder="your email address">
-                <button type="submit">subscribe</button>
-            </div>
-        </div>
+      <!-- SOCIAL -->
+      <div class="footer-social">
+        <button class="social-btn" (click)="openInstagram()" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </button>
+        <button class="social-btn" (click)="openPinterest()" aria-label="Pinterest">
+          <i class="fab fa-pinterest"></i>
+        </button>
+        <button class="social-btn" (click)="openFacebook()" aria-label="Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </button>
+      </div>
+
+      <!-- CONTACT PILL -->
+      <button class="footer-contact-pill" (click)="contactUs()">
+        <i class="fas fa-phone"></i> +91 95106 36002
+      </button>
     </div>
 
-    <!-- bottom footer with copyright and payment -->
-    <div class="footer-bottom">
-        <div class="copyright">
-            © 2026 MOSKA · all rights reserved
-        </div>
-        <div class="legal-links">
-            <a href="#">privacy</a>
-            <a href="#">terms</a>
-            <a href="#">accessibility</a>
-        </div>
-        <div class="payment-icons">
-            <i class="fab fa-cc-visa"></i>
-            <i class="fab fa-cc-mastercard"></i>
-            <i class="fab fa-cc-amex"></i>
-            <i class="fab fa-cc-paypal"></i>
-        </div>
+    <!-- SHOP -->
+    <div class="footer-col">
+      <h5 class="footer-col-title">Shop</h5>
+      <ul class="footer-links">
+        <li *ngFor="let c of categories">
+          <button (click)="goToCategory(c._id)">
+            <i class="fas fa-chevron-right"></i> {{ c.cat_name }}
+          </button>
+        </li>
+        <li *ngIf="categories.length === 0">
+          <button (click)="goToCategory('')">
+            <i class="fas fa-chevron-right"></i> All Products
+          </button>
+        </li>
+      </ul>
     </div>
+
+    <!-- SUPPORT -->
+    <div class="footer-col">
+      <h5 class="footer-col-title">Support</h5>
+      <ul class="footer-links">
+        <li>
+          <button (click)="contactUs()">
+            <i class="fas fa-phone-alt"></i> Contact Us
+          </button>
+        </li>
+        <li>
+          <button (click)="goToOrders()">
+            <i class="fas fa-truck"></i> Shipping & Returns
+          </button>
+        </li>
+        <li>
+          <button (click)="careGuide()">
+            <i class="fas fa-leaf"></i> Care Guide
+          </button>
+        </li>
+        <li>
+          <button (click)="openFaq()">
+            <i class="fas fa-question-circle"></i> FAQ
+          </button>
+        </li>
+        <li>
+          <button (click)="goToOrders()">
+            <i class="fas fa-map-marker-alt"></i> Track Order
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- NEWSLETTER -->
+    <div class="footer-newsletter">
+      <h5 class="footer-col-title">Newsletter</h5>
+      <p class="newsletter-desc">Be the first to know about new arrivals, exclusive offers & slow inspirations.</p>
+
+      <div class="newsletter-wrap">
+          <div class="newsletter-input-row">
+            <input
+              type="email"
+              class="newsletter-input"
+              placeholder="your@email.com"
+              [(ngModel)]="newsletterEmail"
+              (keyup.enter)="subscribe()"
+            />
+            <button class="newsletter-btn" (click)="subscribe()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+      </div>
+
+      <!-- TRUST BADGES -->
+      <div class="footer-badges">
+        <span><i class="fas fa-lock"></i> Secure</span>
+        <span><i class="fas fa-shield-alt"></i> Private</span>
+        <span><i class="fas fa-ban"></i> No Spam</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="footer-divider"></div>
+
+  <!-- BOTTOM BAR -->
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 <span>MOSKA</span> · All rights reserved</p>
+
+    <div class="footer-legal">
+      <button>Privacy</button>
+      <button>Terms</button>
+      <button>Accessibility</button>
+    </div>
+
+    <div class="footer-payments">
+      <i class="fab fa-cc-visa"></i>
+      <i class="fab fa-cc-mastercard"></i>
+      <i class="fab fa-cc-amex"></i>
+      <i class="fab fa-cc-paypal"></i>
+    </div>
+  </div>
+
 </footer>

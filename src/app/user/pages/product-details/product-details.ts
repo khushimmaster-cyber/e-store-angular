@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ProductService } from '../../../service/product-service';
 import { RatingService } from '../../../service/rating-service';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
@@ -14,7 +15,7 @@ import { MSwal as Swal } from '../../../service/swal-service';
   imports: [NgFor, NgIf, FormsModule, DatePipe],  templateUrl: './product-details.html',
   styleUrl: './product-details.css',
 })
-export class ProductDetails implements OnInit {
+export class ProductDetails implements OnInit, OnDestroy {
 
   id: string | null = '';
   product: any;
@@ -48,27 +49,35 @@ export class ProductDetails implements OnInit {
   ) {}
 
   isWishlisted = false;
+  private wishlistSub!: Subscription;
 
   ngOnInit() {
     this.id = this.route.snapshot.params['id'];
     this.loadProduct();
     this.loadReviews();
-    if (this.user_id) {
-      this.wishlistService.load(this.user_id);
-      this.wishlistService.wishlistIds$.subscribe(ids => {
-        this.isWishlisted = ids.has(this.id!);
-        this.cdr.detectChanges();
-      });
-    }
+    this.wishlistSub = this.wishlistService.wishlistIds$.subscribe(ids => {
+      this.isWishlisted = ids.includes(this.id!);
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.wishlistSub?.unsubscribe();
+  }
+
+  // Resolve image: Cloudinary URLs used as-is; legacy filenames get the uploads prefix
+  resolveImage(pic: string): string {
+    if (!pic || pic === 'no-image.jpg') return '';
+    if (pic.startsWith('http')) return pic;
+    return `https://moska-backend-1.onrender.com/uploads/${pic}`;
   }
 
   loadProduct() {
     this.productService.getById(this.id).subscribe({
       next: (res: any) => {
         this.product = res.data;
-        this.displayImage = this.product.pic1;
+        this.displayImage = this.resolveImage(this.product.pic1);
 
-        // Check if a color was passed via queryParam
         const paramColor = this.route.snapshot.queryParamMap.get('color');
 
         if (paramColor && this.product.colors?.length > 0) {
@@ -76,7 +85,7 @@ export class ProductDetails implements OnInit {
           if (match) {
             this.selectedColor = match.color ?? match;
             this.displayImage = (match.image && match.image !== 'no-image.jpg')
-              ? match.image : this.product.pic1;
+              ? this.resolveImage(match.image) : this.resolveImage(this.product.pic1);
           } else {
             this.selectedColor = paramColor;
           }
@@ -84,7 +93,7 @@ export class ProductDetails implements OnInit {
           const first = this.product.colors[0];
           this.selectedColor = first.color ?? first;
           if (first.image && first.image !== 'no-image.jpg') {
-            this.displayImage = first.image;
+            this.displayImage = this.resolveImage(first.image);
           }
         }
 
@@ -107,10 +116,9 @@ export class ProductDetails implements OnInit {
 
   selectColor(colorObj: any) {
     this.selectedColor = colorObj.color ?? colorObj;
-    // Always show the color's own image; fall back to pic1 only if no image attached
     this.displayImage = (colorObj.image && colorObj.image !== 'no-image.jpg')
-      ? colorObj.image
-      : this.product.pic1;
+      ? this.resolveImage(colorObj.image)
+      : this.resolveImage(this.product.pic1);
     this.cdr.detectChanges();
   }
 
@@ -160,52 +168,23 @@ export class ProductDetails implements OnInit {
   toggleWishlist() {
     if (!this.user_id) { this.router.navigate(['/login']); return; }
     const wasWishlisted = this.isWishlisted;
-    this.wishlistService.toggle(this.user_id, this.id!).subscribe({
-      next: (res: any) => {
-        const ids = (res.data || []).map((id: any) => id.toString());
-        this.wishlistService.updateIds(ids);
-        this.cdr.detectChanges();
+    this.wishlistService.toggle(this.id!);
 
-        const dark = this.themeService.dark;
-        const swalDark = dark ? {
-          background: '#1e1e1e',
-          color: '#f0ebe4',
-        } : {};
+    const dark = this.themeService.dark;
+    const swalDark = dark ? { background: '#1e1e1e', color: '#f0ebe4' } : {};
 
-        if (!wasWishlisted) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Added to Wishlist!',
-            text: 'This product has been saved to your wishlist.',
-            timer: 2000,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end',
-            ...swalDark
-          });
-        } else {
-          Swal.fire({
-            icon: 'info',
-            title: 'Removed from Wishlist',
-            timer: 1500,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end',
-            ...swalDark
-          });
-        }
-      },
-      error: () => {
-        const dark = this.themeService.dark;
-        Swal.fire({
-          icon: 'error',
-          title: 'Something went wrong',
-          timer: 2000,
-          showConfirmButton: false,
-          ...(dark ? { background: '#1e1e1e', color: '#f0ebe4' } : {})
-        });
-      }
-    });
+    if (!wasWishlisted) {
+      Swal.fire({
+        icon: 'success', title: 'Added to Wishlist!',
+        text: 'This product has been saved to your wishlist.',
+        timer: 2000, showConfirmButton: false, toast: true, position: 'top-end', ...swalDark
+      });
+    } else {
+      Swal.fire({
+        icon: 'info', title: 'Removed from Wishlist',
+        timer: 1500, showConfirmButton: false, toast: true, position: 'top-end', ...swalDark
+      });
+    }
   }
 
   addToCart(pid: any) {
@@ -238,7 +217,7 @@ export class ProductDetails implements OnInit {
           position: 'top-end',
         });
       },
-      error: () => console.log('error adding cart'),
+      error: () => {}
     });
   }
 

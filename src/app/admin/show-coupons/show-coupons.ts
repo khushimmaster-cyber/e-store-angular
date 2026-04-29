@@ -39,9 +39,7 @@ export class ShowCoupons implements OnInit {
 
       },
 
-      error: (err) => {
-        console.error(err);
-      }
+      error: (err) => {}
 
     });
 

@@ -19,30 +19,21 @@ export class Category implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private cdr: ChangeDetectorRef
-  ) {
-    console.log('🎯 Category component constructor called');
-  }
+  ) {}
 
   ngOnInit() {
-    console.log('🚀 Category component ngOnInit called');
     this.loadCategories();
   }
 
   loadCategories() {
-    console.log('🔄 Loading categories from API...');
     this.categoryService.get().subscribe({
       next: (res: any) => {
-        console.log('✅ Categories API Response:', res);
-        this.categories = res;
-        this.filteredCategories = [...res];
-        console.log('📦 Categories array:', this.categories);
-        console.log('📊 Total categories:', this.categories.length);
+        const data = res?.data ?? res;
+        this.categories = data;
+        this.filteredCategories = [...data];
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('❌ Error loading categories:', err);
-        console.error('Error details:', err.message);
-      }
+      error: () => {}
     });
   }
 

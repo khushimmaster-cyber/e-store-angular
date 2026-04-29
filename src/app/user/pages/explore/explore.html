@@ -1,8 +1,8 @@
 <!-- HERO BANNER -->
 <section class="explore-hero">
   <div class="explore-hero-content">
-    <span class="explore-tag">Discover</span>
-    <h1>Explore Collection</h1>
+    <span class="explore-tag"><i class="fas fa-compass"></i> Discover</span>
+    <h1>Explore <span>Collection</span></h1>
     <p>Browse our full range — filter by category, price & more</p>
   </div>
   <div class="explore-hero-shapes">
@@ -18,9 +18,16 @@
   <!-- SIDEBAR FILTERS -->
   <aside class="explore-sidebar">
 
+    <div class="sidebar-header">
+      <span class="sidebar-header-title"><i class="fas fa-sliders-h"></i> Filters</span>
+      <button class="filter-clear-btn" style="width:auto;padding:5px 12px;font-size:11px;" (click)="clearFilters()">
+        Reset
+      </button>
+    </div>
+
     <!-- Search -->
     <div class="filter-block">
-      <h4 class="filter-title">Search</h4>
+      <h4 class="filter-title"><i class="fas fa-search"></i> Search</h4>
       <div class="filter-search-wrap">
         <i class="fas fa-search"></i>
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search products..." class="filter-search-input">
@@ -30,7 +37,7 @@
 
     <!-- Categories -->
     <div class="filter-block">
-      <h4 class="filter-title">Category</h4>
+      <h4 class="filter-title"><i class="fas fa-tag"></i> Category</h4>
       <div class="filter-cat-list">
         <label class="filter-cat-item" [class.active]="selectedCat === ''">
           <input type="radio" name="cat" [(ngModel)]="selectedCat" value="" hidden>
@@ -47,21 +54,24 @@
 
     <!-- Price Range -->
     <div class="filter-block">
-      <h4 class="filter-title">Price Range</h4>
-      <div class="price-range-display">
-        <span>₹{{ minPrice }}</span>
-        <span>₹{{ maxPrice }}</span>
+      <h4 class="filter-title"><i class="fas fa-rupee-sign"></i> Price Range</h4>
+      <div class="price-values">
+        <span class="price-val">₹{{ minPrice }}</span>
+        <span class="price-val-sep">—</span>
+        <span class="price-val">₹{{ maxPrice }}</span>
       </div>
-      <input type="range" class="price-slider" [(ngModel)]="maxPrice"
-        [min]="0" [max]="priceMax" step="100">
-      <div class="price-range-bar">
-        <div class="price-fill" [style.width.%]="(maxPrice / priceMax) * 100"></div>
+      <div class="price-slider-wrap">
+        <input type="range" class="price-slider" [(ngModel)]="maxPrice"
+          [min]="0" [max]="priceMax" step="100">
+      </div>
+      <div class="price-track">
+        <div class="price-track-fill" [style.width.%]="(maxPrice / priceMax) * 100"></div>
       </div>
     </div>
 
     <!-- Sort -->
     <div class="filter-block">
-      <h4 class="filter-title">Sort By</h4>
+      <h4 class="filter-title"><i class="fas fa-sort-amount-down"></i> Sort By</h4>
       <select class="filter-select" [(ngModel)]="sortBy">
         <option value="default">Default</option>
         <option value="price-asc">Price: Low → High</option>
@@ -71,7 +81,7 @@
       </select>
     </div>
 
-    <!-- Clear -->
+    <!-- Clear All -->
     <button class="filter-clear-btn" (click)="clearFilters()">
       <i class="fas fa-times"></i> Clear All Filters
     </button>
@@ -81,13 +91,24 @@
   <!-- PRODUCTS AREA -->
   <div class="explore-main">
 
+    <!-- Active filter chips -->
+    <div class="active-filters" *ngIf="searchQuery || selectedCat || maxPrice < priceMax">
+      <span class="filter-chip" *ngIf="searchQuery" (click)="searchQuery=''">
+        "{{ searchQuery }}" <i class="fas fa-times"></i>
+      </span>
+      <span class="filter-chip" *ngIf="selectedCat" (click)="selectedCat=''">
+        {{ selectedCatName }} <i class="fas fa-times"></i>
+      </span>
+      <span class="filter-chip" *ngIf="maxPrice < priceMax" (click)="maxPrice=priceMax">
+        Up to ₹{{ maxPrice }} <i class="fas fa-times"></i>
+      </span>
+    </div>
+
     <!-- Toolbar -->
     <div class="explore-toolbar">
       <p class="result-count">
-        <span>{{ totalResults }}</span> product{{ totalResults !== 1 ? 's' : '' }} found
-        <span *ngIf="selectedCat || searchQuery" class="result-filter-tag">
-          {{ searchQuery ? '"' + searchQuery + '"' : '' }}
-        </span>
+        <strong>{{ totalResults }}</strong> product{{ totalResults !== 1 ? 's' : '' }} found
+        <span *ngIf="searchQuery" class="result-filter-tag">"{{ searchQuery }}"</span>
       </p>
       <div class="view-toggle">
         <button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="Grid view">
@@ -100,56 +121,30 @@
     </div>
 
     <!-- Loading -->
-    <div *ngIf="loading" class="explore-loading">
-      <div class="loading-grid">
-        <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6,7,8]"></div>
-      </div>
+    <div *ngIf="loading" class="loading-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
     </div>
 
     <!-- Empty state -->
     <div *ngIf="!loading && totalResults === 0" class="explore-empty">
-      <div class="empty-icon">🔍</div>
+      <span class="empty-icon">🔍</span>
       <h3>No products found</h3>
       <p>Try adjusting your filters or search query</p>
-      <button class="filter-clear-btn" (click)="clearFilters()">Clear Filters</button>
+      <button class="filter-clear-btn" style="width:auto;margin:0 auto;padding:10px 24px;" (click)="clearFilters()">
+        <i class="fas fa-times"></i> Clear Filters
+      </button>
     </div>
 
     <!-- GRID VIEW -->
     <div *ngIf="!loading && totalResults > 0 && viewMode === 'grid'" class="explore-grid">
-      <div class="ex-card" *ngFor="let p of filtered">
-        <div class="ex-img-wrap">
-          <img [src]="imgUrl(p.pic1)" [alt]="p.pname" class="ex-img-main">
-          <img [src]="imgUrl(p.picHover)" [alt]="p.pname" class="ex-img-hover">
-          <div class="ex-overlay">
-            <a (click)="navigateToDetails($event, p)" class="ex-view-btn" style="cursor:pointer">View Details</a>
-          </div>
-        </div>
-        <button class="ex-wish-btn" (click)="toggleWishlist($event, p._id)"
-          [class.active]="isWishlisted(p._id)">
-          <i class="fas fa-heart"></i>
-        </button>
-        <div class="ex-info">
-          <span class="ex-cat">{{ p.category?.cat_name }}</span>
-          <h3 class="ex-name">{{ p.pname }}</h3>
-          <!-- Color dots -->
-          <div class="ex-color-dots" *ngIf="p.colors && p.colors.length > 0">
-            <span
-              *ngFor="let c of p.colors"
-              class="ex-color-dot"
-              [style.background]="c.color ?? c"
-              [class.active]="selectedColors[p._id] === (c.color ?? c)"
-              (click)="selectColor($event, p._id, c)"
-              [title]="c.color ?? c">
-            </span>
-          </div>
-          <div class="ex-price-row">
-            <span class="ex-price">₹{{ p.price }}</span>
-            <button class="ex-cart-btn" (click)="addToCart($event, p)">
-              <i class="fas fa-shopping-bag"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+      <app-product-card
+        *ngFor="let p of filtered"
+        [product]="p"
+        [selectedColor]="selectedColors[p._id] || ''"
+        (cardClicked)="navigateToDetails($event, p)"
+        (addToCart)="addToCart($event, p)"
+        (colorSelected)="selectColor($event.event, p._id, $event.color)">
+      </app-product-card>
     </div>
 
     <!-- LIST VIEW -->
@@ -163,13 +158,14 @@
           <h3 class="ex-name">{{ p.pname }}</h3>
           <p class="ex-list-desc">{{ p.description || 'Premium quality product from our curated collection.' }}</p>
           <div class="ex-list-bottom">
-            <span class="ex-price">₹{{ p.price }}</span>
+            <div>
+              <span class="ex-price">₹{{ p.price }}</span>
+              <span class="ex-price-old" *ngIf="p.oldPrice">₹{{ p.oldPrice }}</span>
+            </div>
             <div class="ex-list-actions">
-              <button class="ex-wish-btn-list" (click)="toggleWishlist($event, p._id)"
-                [class.active]="isWishlisted(p._id)">
-                <i class="fas fa-heart"></i>
-              </button>
-              <a (click)="navigateToDetails($event, p)" class="ex-view-btn-list" style="cursor:pointer">View Details</a>
+              <a (click)="navigateToDetails($event, p)" class="ex-view-btn-list" style="cursor:pointer">
+                <i class="fas fa-eye"></i> View Details
+              </a>
               <button class="ex-cart-btn-list" (click)="addToCart($event, p)">
                 <i class="fas fa-shopping-bag"></i> Add to Cart
               </button>

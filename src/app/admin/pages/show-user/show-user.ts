@@ -22,8 +22,8 @@ export class ShowUser implements OnInit {
 
   loadUsers() {
     this.loading = true;
-    this.http.get<any[]>('http://localhost:3000/api/alluser').subscribe({
-      next: (data) => { this.users = data; this.loading = false; },
+    this.http.get<any>('https://moska-backend-1.onrender.com/api/alluser').subscribe({
+      next: (res) => { this.users = res?.data ?? res; this.loading = false; },
       error: () => { this.loading = false; }
     });
   }
@@ -57,7 +57,7 @@ export class ShowUser implements OnInit {
       confirmButtonText: 'Yes, delete',
     }).then(result => {
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:3000/api/deleteuser/${id}`).subscribe({
+        this.http.delete(`https://moska-backend-1.onrender.com/api/deleteuser/${id}`).subscribe({
           next: () => {
             this.users = this.users.filter(u => u._id !== id);
             Swal.fire({ icon: 'success', title: 'Deleted!', timer: 1500, showConfirmButton: false });

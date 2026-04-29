@@ -32,7 +32,7 @@ export class ShowProduct implements OnInit {
 
   loadProducts() {
     this.isLoading = true;
-    this.http.get<any>('http://localhost:3000/api/products/getall').subscribe({
+    this.http.get<any>('https://moska-backend-1.onrender.com/api/products/getall').subscribe({
       next: (res) => {
         this.products = res?.data ? [...res.data] : Array.isArray(res) ? [...res] : [];
         this.isLoading = false;
@@ -67,8 +67,12 @@ export class ShowProduct implements OnInit {
     return 'box';
   }
 
-  viewImage(filename: string) {
-    window.open('http://localhost:3000/uploads/' + filename, '_blank');
+  viewImage(imageUrl: string) {
+    // Cloudinary URLs are full URLs; legacy filenames need the uploads prefix
+    const url = imageUrl?.startsWith('http')
+      ? imageUrl
+      : 'https://moska-backend-1.onrender.com/uploads/' + imageUrl;
+    window.open(url, '_blank');
   }
 
   editProduct(id: string) {
@@ -82,7 +86,7 @@ export class ShowProduct implements OnInit {
       confirmButtonText: 'Yes, delete'
     }).then(result => {
       if (result.isConfirmed) {
-        this.http.delete(`http://localhost:3000/api/products/delete/${id}`).subscribe({
+        this.http.delete(`https://moska-backend-1.onrender.com/api/products/delete/${id}`).subscribe({
           next: () => {
             this.products = this.products.filter(p => p._id !== id);
             this.cdr.detectChanges();
@@ -102,10 +106,7 @@ export class ShowProduct implements OnInit {
     product.popular = newValue;
     this.togglingIds.add(product._id);
 
-    const formData = new FormData();
-    formData.append('popular', newValue.toString());
-
-    this.http.put(`http://localhost:3000/api/products/update/${product._id}`, formData).subscribe({
+    this.http.put(`https://moska-backend-1.onrender.com/api/products/update/${product._id}`, { popular: newValue }).subscribe({
       next: () => {
         this.togglingIds.delete(product._id);
         this.showToast(newValue ? '⭐ Marked as Popular' : '✖ Removed from Popular', newValue ? 'success' : 'info');

@@ -23,7 +23,7 @@
             <label class="add-product-label"><i class="fas fa-list-ul"></i> Category</label>
             <select class="add-product-input" formControlName="category">
               <option value="">Select Category</option>
-              <option *ngFor="let cat of categories" [value]="cat.cat_name">{{ cat.cat_name }}</option>
+              <option *ngFor="let cat of categories" [value]="cat._id">{{ cat.cat_name }}</option>
             </select>
           </div>
 
@@ -83,7 +83,7 @@
           </div>
 
           <!-- Sizes (Clothes only) -->
-          <div class="add-product-group full-width" *ngIf="productForm.get('category')?.value?.toLowerCase() === 'clothes'">
+          <div class="add-product-group full-width" *ngIf="isClothesCategory">
             <label class="add-product-label"><i class="fas fa-ruler-horizontal"></i> Sizes</label>
             <div class="size-checkbox-row">
               <label class="size-chip" *ngFor="let size of availableSizes"

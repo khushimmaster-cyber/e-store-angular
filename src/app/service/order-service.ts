@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class OrderService {
-  apiUrl = 'http://localhost:3000/api/order/';
+  apiUrl = 'https://moska-backend-1.onrender.com/api/order/';
 
   constructor(private http: HttpClient) {}
 
@@ -17,13 +17,11 @@ export class OrderService {
   }
 
   applyCoupon(data: any) {
-    return this.http.post('http://localhost:3000/api/coupon/apply', data);
+    return this.http.post('https://moska-backend-1.onrender.com/api/coupon/apply', data);
   }
 
   // GET USER ORDERS
   getUserOrders(userId: any): Observable<any> {
-    console.log(this.apiUrl + 'user/' + userId);
-
     return this.http.get(this.apiUrl + 'user/' + userId);
   }
 

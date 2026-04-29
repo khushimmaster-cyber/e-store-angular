@@ -14,7 +14,7 @@
     <!-- LEFT: Image Gallery -->
     <div class="pd-gallery">
       <div class="pd-main-image">
-        <img [src]="'http://localhost:3000/uploads/' + displayImage" alt="Product">
+        <img [src]="displayImage" alt="Product">
         
         <!-- <div class="pd-discount-badge">20% OFF</div> -->
         <div class="pd-wishlist-btn" (click)="toggleWishlist()"
@@ -27,10 +27,10 @@
         <!-- Show pic1 & picHover only when no color is selected -->
         <ng-container *ngIf="!selectedColor || product.colors?.length === 0">
           <div class="pd-thumb" [class.active]="displayImage === product.pic1" (click)="displayImage = product.pic1">
-            <img [src]="'http://localhost:3000/uploads/' + product.pic1" alt="img1">
+            <img [src]="product.pic1" alt="img1">
           </div>
           <div class="pd-thumb" [class.active]="displayImage === product.picHover" (click)="displayImage = product.picHover">
-            <img [src]="'http://localhost:3000/uploads/' + product.picHover" alt="img2">
+            <img [src]="product.picHover" alt="img2">
           </div>
         </ng-container>
 
@@ -40,7 +40,7 @@
             *ngIf="colorObj.image && colorObj.image !== 'no-image.jpg'"
             [class.active]="displayImage === colorObj.image"
             (click)="selectColor(colorObj)">
-            <img [src]="'http://localhost:3000/uploads/' + colorObj.image" [alt]="colorObj.color">
+            <img [src]="colorObj.image" [alt]="colorObj.color">
           </div>
         </ng-container>
       </div>
@@ -67,8 +67,8 @@
 
       <!-- Price -->
       <div class="pd-price-row">
-        <span class="pd-price">{{product.price}}</span>
-        <span class="pd-old-price">{{product.oldPrice}}</span>
+        <span class="pd-price">₹{{product.price}}</span>
+        <span class="pd-old-price">₹{{product.oldPrice}}</span>
         <span class="pd-save" *ngIf="product.oldPrice > product.price">Save ₹{{ product.oldPrice - product.price }}</span>
       </div>
 

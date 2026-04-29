@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class CartService {
 
-  apiUrl = "http://localhost:3000/api/cart/";
+  apiUrl = "https://moska-backend-1.onrender.com/api/cart/";
 
   constructor(private http: HttpClient) {}
 

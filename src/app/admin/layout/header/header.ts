@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, Output, EventEmitter } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -20,6 +20,8 @@ export class Header implements OnInit, OnDestroy {
   notifications: any[] = [];
   unreadCount       = 0;
 
+  @Output() menuToggle = new EventEmitter<void>();
+
   private pollInterval: any;
 
   constructor(private router: Router, private http: HttpClient) {}
@@ -35,7 +37,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   loadNotifications() {
-    this.http.get<any>('http://localhost:3000/api/admin/notifications').subscribe({
+    this.http.get<any>('https://moska-backend-1.onrender.com/api/admin/notifications').subscribe({
       next: (res) => {
         if (res.success) {
           this.notifications = res.data;
@@ -47,7 +49,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   toggleSidebar() {
-    document.getElementById('sidebar')?.classList.toggle('active');
+    this.menuToggle.emit();
   }
 
   toggleDropdown() {

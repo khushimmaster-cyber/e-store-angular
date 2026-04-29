@@ -1,23 +1,29 @@
 <div class="admin-layout">
 
-  <!-- Sidebar -->
-  <app-sidebar class="sidebar"></app-sidebar>
+  <!-- Mobile overlay — behind sidebar, clicking closes it -->
+  <div class="admin-sidebar-overlay"
+       [class.show]="sidebarOpen"
+       (click)="closeSidebar()">
+  </div>
+
+  <!-- Sidebar — receives open state as CSS class -->
+  <app-sidebar [class.mobile-open]="sidebarOpen"></app-sidebar>
 
   <!-- Main Area -->
   <div class="main-area">
 
-    <!-- Header -->
-    <app-header class="admin-header"></app-header>
+    <!-- Header — emits toggle event -->
+    <app-header (menuToggle)="toggleSidebar()"></app-header>
 
     <!-- Page Content -->
     <div class="main-content">
-   <div class="page-container">
-       <router-outlet></router-outlet>
-   </div>
-</div>
+      <div class="page-container">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
 
     <!-- Footer -->
-    <app-footer ></app-footer>
+    <app-footer></app-footer>
 
   </div>
 

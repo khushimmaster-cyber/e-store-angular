@@ -105,4 +105,4 @@
 }
 .btn-logout:hover { background: #c85a54; color: white; }
 
-:host { display: block; zoom: 1.15; }
+:host { display: block; }

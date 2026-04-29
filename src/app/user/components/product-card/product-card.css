@@ -1,63 +1,4 @@
-.wishlist-page {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 30px 20px 80px;
-  font-family: 'Montserrat', sans-serif;
-}
-
-/* ── PAGE HEADER ── */
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 32px;
-}
-
-.back-btn {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  background: #fdf6ec;
-  border: 1px solid rgba(155,123,94,0.3);
-  display: flex; align-items: center; justify-content: center;
-  color: #9B7B5E; text-decoration: none; font-size: 14px;
-  transition: all 0.2s;
-}
-.back-btn:hover { background: #9B7B5E; color: white; }
-
-.page-header h1 {
-  font-size: 26px; font-weight: 700; color: #3A2E26; flex: 1;
-  font-family: 'Playfair Display', serif;
-}
-
-.count {
-  font-size: 13px; color: #9B7B5E; font-weight: 600;
-  background: rgba(155,123,94,0.1);
-  padding: 4px 12px; border-radius: 20px;
-}
-
-/* ── EMPTY STATE ── */
-.empty-state {
-  text-align: center; padding: 80px 20px;
-}
-.empty-state i { font-size: 52px; color: #e0b0b0; margin-bottom: 16px; display: block; }
-.empty-state p { color: #7A6A5C; font-size: 16px; margin-bottom: 20px; }
-
-.btn-shop {
-  display: inline-block; padding: 12px 32px;
-  background: #9B7B5E; color: white;
-  border-radius: 40px; font-size: 13px; font-weight: 600;
-  text-decoration: none; transition: all 0.2s;
-}
-.btn-shop:hover { background: #654321; }
-
-/* ── GRID ── */
-.wishlist-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
-}
-
-/* ── CARD (same as product-card component) ── */
+/* ── CARD (Explore page design — source of truth) ── */
 .ex-card {
   background: white;
   border-radius: 18px;
@@ -142,13 +83,11 @@
   text-transform: uppercase;
   transform: translateY(8px);
   transition: transform 0.3s ease, background 0.2s;
-  cursor: pointer;
-  border: none;
 }
 .ex-card:hover .ex-view-btn { transform: translateY(0); }
 .ex-view-btn:hover { background: #C5A059; color: white; }
 
-/* ── WISHLIST / REMOVE BUTTON ── */
+/* ── WISHLIST BUTTON ── */
 .ex-wish-btn {
   position: absolute;
   top: 14px; right: 14px;
@@ -210,8 +149,16 @@
 .ex-color-dot {
   width: 16px; height: 16px;
   border-radius: 50%;
+  cursor: pointer;
   border: 2px solid transparent;
+  transition: all 0.2s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.ex-color-dot:hover { transform: scale(1.25); }
+.ex-color-dot.active {
+  border-color: #3A2E26;
+  box-shadow: 0 0 0 2px rgba(58,46,38,0.25);
+  transform: scale(1.15);
 }
 
 /* ── PRICE ROW ── */
@@ -257,28 +204,16 @@
 
 /* ── DARK MODE ── */
 :host-context([data-theme="dark"]) .ex-card {
-  background: #1e1a17;
-  border-color: rgba(255,255,255,0.07);
+  background: #1e1a17 !important;
+  border-color: rgba(255,255,255,0.07) !important;
 }
 :host-context([data-theme="dark"]) .ex-name,
-:host-context([data-theme="dark"]) .ex-price { color: #f0ebe4; }
-:host-context([data-theme="dark"]) .ex-img-wrap { background: #2a2420; }
+:host-context([data-theme="dark"]) .ex-price { color: #f0ebe4 !important; }
+:host-context([data-theme="dark"]) .ex-img-wrap { background: #2a2420 !important; }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 1200px) {
-  .wishlist-grid { grid-template-columns: repeat(4, 1fr); }
-}
-@media (max-width: 900px) {
-  .wishlist-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 600px) {
-  .wishlist-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 768px) {
   .ex-img-wrap { height: 210px; }
   .ex-name { font-size: 14px; }
   .ex-price { font-size: 15px; }
 }
-@media (max-width: 380px) {
-  .wishlist-grid { grid-template-columns: 1fr; }
-}
-
-:host { display: block; }

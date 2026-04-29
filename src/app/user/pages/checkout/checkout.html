@@ -81,11 +81,14 @@
 
         <div class="payment-options">
 
-          <div class="payment-option" [class.selected]="pmode === 'cod'" (click)="pmode = 'cod'">
+          <div class="payment-option" [class.selected]="pmode === 'cod'"
+               [class.disabled-option]="isCODDisabled"
+               (click)="!isCODDisabled && (pmode = 'cod')">
             <div class="payment-icon">💵</div>
             <div class="payment-info">
               <span class="payment-title">Cash on Delivery</span>
-              <span class="payment-sub">Pay when you receive</span>
+              <span class="payment-sub" *ngIf="!isCODDisabled">Pay when you receive</span>
+              <span class="payment-sub cod-restrict" *ngIf="isCODDisabled">Not available above ₹5000</span>
             </div>
             <div class="payment-radio" [class.active]="pmode === 'cod'"></div>
           </div>
@@ -114,7 +117,7 @@
         <div class="order-items">
           <div class="order-item" *ngFor="let item of cartItems">
             <div class="order-item-img">
-              <img [src]="imageUrl + (item.displayImage || item.productId.pic1)" [alt]="item.productId.pname" />
+              <img [src]="resolveImage(item.displayImage || item.productId.pic1)" [alt]="item.productId.pname" />
               <span class="qty-badge">{{ item.quantity }}</span>
             </div>
             <div class="order-item-info">

@@ -32,7 +32,7 @@ export class Sidebar implements OnInit {
       this.loading = false;
     }
 
-    this.http.get<any>('http://localhost:3000/api/admin/stats').subscribe({
+    this.http.get<any>('https://moska-backend-1.onrender.com/api/admin/stats').subscribe({
       next: (res) => {
         if (res.success) {
           this.stats = res.data;

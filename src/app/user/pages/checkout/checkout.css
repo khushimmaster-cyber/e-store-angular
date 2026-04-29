@@ -208,6 +208,17 @@
   font-size: 11px;
   color: #7a6a5c;
 }
+.cod-restrict {
+  color: #e05c5c;
+  font-weight: 600;
+}
+.disabled-option {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f5f5f5 !important;
+  border-color: #ddd !important;
+}
 .payment-radio {
   width: 18px;
   height: 18px;

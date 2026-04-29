@@ -150,7 +150,7 @@
             <tr *ngFor="let p of filteredProducts">
               <td>
                 <div class="product-cell">
-                  <img [src]="getProductImg(p)" [alt]="p.pname" onerror="this.src='https://via.placeholder.com/40'">
+                  <img [src]="getProductImg(p)" [alt]="p.pname" (error)="onImageError($event)">
                   <span>{{ p.pname }}</span>
                 </div>
               </td>

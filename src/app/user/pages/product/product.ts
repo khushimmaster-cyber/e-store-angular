@@ -1,28 +1,30 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../../../service/product-service';
-import { NgFor, NgIf, NgClass } from '@angular/common';
+import { CartService } from '../../../service/cart-service';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { WishlistService } from '../../../service/wishlist-service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MSwal as Swal } from '../../../service/swal-service';
+import { ProductCardComponent } from '../../components/product-card/product-card';
 
 @Component({
   selector: 'app-product',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, FormsModule, RouterLink, RouterLinkActive],
+  imports: [NgFor, NgIf, FormsModule, RouterLink, ProductCardComponent],
   templateUrl: './product.html',
   styleUrl: './product.css',
 })
 export class Product implements OnInit {
   products: any[] = [];
-  baseUrl = 'http://localhost:3000/uploads/';
-  userId = sessionStorage.getItem('id');
+  baseUrl = 'https://moska-backend-1.onrender.com/uploads/';
   id: string = '';
   searchQuery: string = '';
   sortBy: string = 'default';
+  loading = true;
+  selectedColors: Record<string, string> = {};
 
   get filteredProducts(): any[] {
-    let list = this.products;
-
+    let list = [...this.products];
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
       list = list.filter(p =>
@@ -30,58 +32,66 @@ export class Product implements OnInit {
         p.category?.cat_name?.toLowerCase().includes(q)
       );
     }
-
-    list = [...list];
     switch (this.sortBy) {
       case 'price-asc':  list.sort((a, b) => +a.price - +b.price); break;
       case 'price-desc': list.sort((a, b) => +b.price - +a.price); break;
       case 'name-asc':   list.sort((a, b) => a.pname?.localeCompare(b.pname)); break;
       case 'name-desc':  list.sort((a, b) => b.pname?.localeCompare(a.pname)); break;
     }
-
     return list;
   }
 
   constructor(
     private productService: ProductService,
+    private cartService: CartService,
     public router: Router,
-    private wishlistService: WishlistService,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.loadProducts();
-    if (this.userId) {
-      this.wishlistService.load(this.userId);
-    }
-  }
-
-  loadProducts() {
-    this.id = this.route.snapshot.params['id'];
-    this.productService.getcatById(this.id).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.products = res.data;
-          this.cdr.detectChanges();
-        }
-      },
-      error: (err) => console.error('Error loading products:', err)
+    this.route.paramMap.subscribe(params => {
+      this.id = params.get('id') || '';
+      this.loadProducts();
     });
   }
 
-  isWishlisted(productId: string): boolean {
-    return this.wishlistService.isWishlisted(productId);
+  loadProducts() {
+    this.loading = true;
+    this.productService.getcatById(this.id).subscribe({
+      next: (res: any) => {
+        this.products = res?.data ?? res ?? [];
+        this.loading = false;
+      },
+      error: () => { this.loading = false; }
+    });
   }
 
-  toggleWishlist(event: Event, productId: string) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!this.userId) { this.router.navigate(['/login']); return; }
-    this.wishlistService.toggle(this.userId, productId).subscribe({
-      next: (res: any) => {
-        const ids = (res.data || []).map((p: any) => (p._id || p).toString());
-        this.wishlistService.updateIds(ids);
+  selectColor(e: Event, productId: string, colorObj: any) {
+    e.preventDefault(); e.stopPropagation();
+    this.selectedColors[productId] = colorObj.color ?? colorObj;
+  }
+
+  navigateToDetails(e: Event, p: any) {
+    e.preventDefault(); e.stopPropagation();
+    const color = this.selectedColors[p._id] || '';
+    this.router.navigate(['/productdetails', p._id], color ? { queryParams: { color } } : {});
+  }
+
+  addToCart(e: Event, p: any) {
+    e.preventDefault(); e.stopPropagation();
+
+    const userId = sessionStorage.getItem('id');
+    if (!userId) { this.router.navigate(['/login']); return; }
+
+    this.cartService.addToCart({ userId, productId: p._id, quantity: 1 }).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success', title: 'Added to Cart!', text: `${p.pname} added.`,
+          timer: 1500, showConfirmButton: false, toast: true, position: 'top-end'
+        });
+      },
+      error: () => {
+        Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not add to cart.', confirmButtonColor: '#9B7B5E' });
       }
     });
   }

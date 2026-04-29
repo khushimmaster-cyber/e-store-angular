@@ -596,3 +596,17 @@ tbody tr:hover {
   display: block;
   margin-bottom: 12px;
 }
+
+@media (max-width: 500px) {
+  .show-user-container { padding: 10px 8px; }
+  .show-user-header h1 { font-size: 22px; }
+  .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+  .stat-card { padding: 16px; }
+  .stat-value { font-size: 22px; }
+  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 600px; }
+  th, td { padding: 10px 12px; font-size: 12px; }
+  .user-cell img, .avatar-circle { width: 32px; height: 32px; }
+  .pagination { gap: 10px; }
+  .page-btn { padding: 8px 12px; font-size: 12px; }
+}

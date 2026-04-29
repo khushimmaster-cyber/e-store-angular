@@ -47,9 +47,9 @@
                 <!-- Images -->
                 <td>
                   <div class="product-images">
-                    <img [src]="'http://localhost:3000/uploads/' + p.pic1"
+                    <img [src]="p.pic1"
                          class="image-thumb" title="Main" (click)="viewImage(p.pic1)" alt="Main">
-                    <img [src]="'http://localhost:3000/uploads/' + p.picHover"
+                    <img [src]="p.picHover"
                          class="image-thumb" title="Hover" (click)="viewImage(p.picHover)" alt="Hover">
                   </div>
                 </td>

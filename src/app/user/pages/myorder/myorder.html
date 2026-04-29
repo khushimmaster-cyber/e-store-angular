@@ -5,6 +5,25 @@
         <p>{{ orders.length }} order{{ orders.length !== 1 ? 's' : '' }} placed</p>
     </div>
 
+    <!-- SEARCH + FILTER BAR -->
+    <div class="search-filter-bar">
+        <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" [(ngModel)]="searchQuery" placeholder="Search orders..." class="search-input" />
+            <button class="clear-search" *ngIf="searchQuery" (click)="searchQuery=''">✕</button>
+        </div>
+        <button class="filter-btn" (click)="openFilter()">
+            <i class="fas fa-sliders-h"></i> Filters
+            <span class="filter-dot" *ngIf="selectedStatus !== 'All'"></span>
+        </button>
+    </div>
+
+    <!-- ACTIVE FILTER TAG -->
+    <div class="active-filter-tag" *ngIf="selectedStatus !== 'All'">
+        <span>Status: {{ selectedStatus }}</span>
+        <button (click)="selectedStatus = 'All'">✕</button>
+    </div>
+
     <!-- EMPTY STATE -->
     <div *ngIf="orders.length === 0" class="empty-orders">
         <div class="empty-icon">📦</div>
@@ -13,8 +32,15 @@
         <a routerLink="/" class="btn-shop">Start Shopping</a>
     </div>
 
+    <!-- NO RESULTS -->
+    <div *ngIf="orders.length > 0 && filteredOrders.length === 0" class="empty-orders">
+        <div class="empty-icon">🔍</div>
+        <h3>No orders found</h3>
+        <p>Try different search or filter.</p>
+    </div>
+
     <!-- ORDER CARDS -->
-    <div class="order-card" *ngFor="let order of orders; let i = index">
+    <div class="order-card" *ngFor="let order of filteredOrders; let i = index">
 
         <!-- HEADER -->
         <div class="order-header">
@@ -60,7 +86,7 @@
         <div class="order-items">
             <div class="order-item" *ngFor="let item of order.items">
                 <div class="item-img">
-                    <img [src]="imageUrl + item.productId?.pic1"
+                    <img [src]="resolveImage(item.productId?.pic1)"
                          [alt]="item.productId?.pname"
                          onerror="this.src='https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100'">
                 </div>
@@ -97,9 +123,43 @@
                     (click)="cancelOrder(order._id)">
                     Cancel Order
                 </button>
+                <button
+                    *ngIf="order.status?.toLowerCase() === 'cancelled'"
+                    class="btn-buy-again"
+                    (click)="buyAgain(order)">
+                    🛍️ Buy Again
+                </button>
             </div>
         </div>
 
     </div>
 
+</div>
+
+<!-- FILTER MODAL -->
+<div class="filter-modal-bg" *ngIf="showFilterModal" (click)="closeFilter()">
+    <div class="filter-modal" (click)="$event.stopPropagation()">
+
+        <div class="filter-modal-header">
+            <span class="filter-title">FILTER BY</span>
+            <button class="filter-close" (click)="closeFilter()">✕</button>
+        </div>
+
+        <div class="filter-modal-body">
+            <p class="filter-section-label">Status</p>
+            <div class="filter-options">
+                <label class="filter-option" *ngFor="let s of filterStatuses">
+                    <input type="radio" name="statusFilter" [value]="s" [(ngModel)]="tempStatus" />
+                    <span class="radio-custom"></span>
+                    <span class="option-label">{{ s }}</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="filter-modal-footer">
+            <button class="btn-clear-filter" (click)="clearFilter()">Clear</button>
+            <button class="btn-apply-filter" (click)="applyFilter()">Apply</button>
+        </div>
+
+    </div>
 </div>

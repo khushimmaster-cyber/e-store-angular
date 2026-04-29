@@ -25,7 +25,13 @@ export class Checkout implements OnInit {
   discount: number = 0;
   couponCode: string = '';
   finalTotal: number = 0;
-  imageUrl = 'http://localhost:3000/uploads/';
+  private readonly baseUrl = 'https://moska-backend-1.onrender.com/uploads/';
+
+  resolveImage(pic: string): string {
+    if (!pic || pic === 'no-image.jpg') return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100';
+    if (pic.startsWith('http')) return pic;
+    return this.baseUrl + pic;
+  }
 
   // Shipping form
   form = {
@@ -37,6 +43,11 @@ export class Checkout implements OnInit {
   };
 
   pmode: string = 'cod';
+
+  // COD restrict — 5000 thi vadhu order hoy to COD disable
+  get isCODDisabled(): boolean {
+    return this.total > 5000;
+  }
 
   couponInput: string = '';
   couponLoading: boolean = false;
@@ -114,9 +125,47 @@ export class Checkout implements OnInit {
     if (!this.cartItems.length) {
       this.router.navigate(['/cart']);
     }
+    // Auto-switch to online if COD not available
+    if (this.isCODDisabled) {
+      this.pmode = 'online';
+    }
     this.couponService.getActiveCoupons().subscribe((res: any) => {
       this.coupons = res || [];
+      // auto-apply best coupon if none already applied from cart
+      if (!this.couponCode) {
+        this.applyBestCoupon();
+      }
     });
+  }
+
+  applyBestCoupon(): void {
+    if (!this.coupons.length || this.total <= 0) return;
+
+    let bestDiscount = 0;
+    let bestCode = '';
+
+    this.coupons.forEach((coupon: any) => {
+      if (!coupon.isActive) return;
+      if (this.total < coupon.minOrderAmount) return;
+
+      let discount = 0;
+      if (coupon.discountType === 'percentage') {
+        discount = (this.total * coupon.discountValue) / 100;
+        if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
+      } else {
+        discount = coupon.discountValue;
+      }
+
+      if (discount > bestDiscount) {
+        bestDiscount = discount;
+        bestCode = coupon.code;
+      }
+    });
+
+    if (bestCode) {
+      this.couponInput = bestCode;
+      this.applyCoupon();
+    }
   }
 
   get grandTotal(): number {
@@ -145,7 +194,7 @@ export class Checkout implements OnInit {
     if (!this.couponInput.trim()) return;
     this.couponLoading = true;
     this.couponError = '';
-    this.orderService.applyCoupon({ code: this.couponInput.trim(), orderTotal: this.total }).subscribe({
+    this.couponService.applyCoupon({ code: this.couponInput.trim(), cartTotal: this.total }).subscribe({
       next: (res: any) => {
         this.couponLoading = false;
         this.discount = res.discount || 0;
@@ -180,8 +229,8 @@ export class Checkout implements OnInit {
     const orderData = {
       userId: this.userId,
       items: this.cartItems.map((item: any) => ({
-        productId: item.productId._id,
-        quantity: item.quantity,
+        productId: item.productId?._id || item.productId,
+        quantity: item.quantity || 1,
         color: item.color || '',
         size: item.size || '',
       })),
@@ -247,11 +296,11 @@ export class Checkout implements OnInit {
           }
         });
       },
-      error: () => {
+      error: (err: any) => {
         Swal.fire({
           icon: 'error',
           title: 'Order Failed',
-          text: 'Something went wrong. Please try again.',
+          text: err?.error?.error || err?.error?.message || 'Something went wrong. Please try again.',
           confirmButtonColor: '#9B7B5E',
         });
       },

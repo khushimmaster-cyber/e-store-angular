@@ -33,14 +33,13 @@ export class Dashboard implements OnInit, OnDestroy {
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:3000/api/admin/stats/dashboard').subscribe({
+    this.http.get<any>('https://moska-backend-1.onrender.com/api/admin/stats/dashboard').subscribe({
       next: (res) => {
         if (res.success) {
           this.stats        = res.data.stats;
           this.recentOrders = res.data.recentOrders;
           this.topProducts  = res.data.topProducts;
           this.revenueChartData = res.data.revenueChart || [];
-          console.log('revenueChart:', this.revenueChartData);
         }
         this.loading = false;
         this.cdr.detectChanges();
@@ -233,8 +232,16 @@ export class Dashboard implements OnInit, OnDestroy {
     return 'In Stock';
   }
 
+  readonly fallbackImg = 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100';
+
   getProductImg(p: any): string {
-    if (p.pic1) return 'http://localhost:3000/uploads/' + p.pic1;
-    return 'https://via.placeholder.com/40';
+    const pic = p.pic1;
+    if (!pic || pic === 'no-image.jpg') return this.fallbackImg;
+    if (pic.startsWith('http')) return pic;                                          // Cloudinary URL
+    return 'https://moska-backend-1.onrender.com/uploads/' + pic;                   // legacy filename
+  }
+
+  onImageError(event: Event) {
+    (event.target as HTMLImageElement).src = this.fallbackImg;
   }
 }

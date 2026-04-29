@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class CouponService {
-  private apiUrl = 'http://localhost:3000/api/coupons';
+  private apiUrl = 'https://moska-backend-1.onrender.com/api/coupons';
 
   constructor(private http: HttpClient) {}
 

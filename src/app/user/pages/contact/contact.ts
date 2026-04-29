@@ -29,7 +29,7 @@ export class Contact {
 
     this.loading = true;
 
-    this.http.post('http://localhost:3000/api/contact', this.form).subscribe({
+    this.http.post('https://moska-backend-1.onrender.com/api/contact', this.form).subscribe({
       next: () => {
         this.loading = false;
         Swal.fire({

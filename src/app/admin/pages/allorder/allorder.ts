@@ -12,8 +12,14 @@ import { MSwal as Swal } from '../../../service/swal-service';
 })
 export class Allorder {
   orders: any[] = [];
-  imageUrl = 'http://localhost:3000/uploads/';
+  private readonly baseUrl = 'https://moska-backend-1.onrender.com/uploads/';
   searchText: string = '';
+
+  resolveImage(pic: string): string {
+    if (!pic || pic === 'no-image.jpg') return 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=80';
+    if (pic.startsWith('http')) return pic;
+    return this.baseUrl + pic;
+  }
 
   constructor(private orderService: OrderService, private cdr: ChangeDetectorRef) {}
 
@@ -37,7 +43,7 @@ export class Allorder {
         this.orders = res.data || [];
         this.cdr.detectChanges();
       },
-      error: (err) => console.log(err)
+      error: () => {}
     });
   }
 
@@ -47,7 +53,7 @@ export class Allorder {
         Swal.fire({ icon: 'success', title: 'Status Updated', timer: 1200, showConfirmButton: false });
         this.getOrders();
       },
-      error: (err) => console.log(err)
+      error: () => {}
     });
   }
 }

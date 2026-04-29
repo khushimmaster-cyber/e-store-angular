@@ -26,7 +26,7 @@ export class ShowProduct implements OnInit {
       next: (res: any) => {
         this.products = res.data || [];
       },
-      error: (err) => console.log(err)
+      error: () => {}
     });
   }
 
@@ -41,7 +41,7 @@ export class ShowProduct implements OnInit {
           alert('Product deleted');
           this.loadProducts();
         },
-        error: (err) => console.log(err)
+        error: () => {}
       });
     }
   }

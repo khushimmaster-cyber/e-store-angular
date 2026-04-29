@@ -1,0 +1,59 @@
+<div class="ex-card" (click)="onCardClick($event)">
+
+  <!-- Image wrapper -->
+  <div class="ex-img-wrap">
+    <img [src]="cardImage" [alt]="product?.pname" class="ex-img-main">
+    <img [src]="hoverImage" [alt]="product?.pname" class="ex-img-hover">
+
+    <!-- Popular badge -->
+    <span class="ex-badge" *ngIf="product?.popular">⭐ Popular</span>
+
+    <!-- Hover overlay -->
+    <div class="ex-overlay">
+      <a class="ex-view-btn" (click)="onCardClick($event)">
+        <i class="fas fa-eye"></i> View
+      </a>
+    </div>
+  </div>
+
+  <!-- Wishlist button — reactive via async pipe, no function call -->
+  <button
+    class="ex-wish-btn"
+    [class.active]="isWishlisted$ | async"
+    (click)="onToggleWishlist($event)"
+    title="Wishlist">
+    <i class="fas fa-heart"></i>
+  </button>
+
+  <!-- Card info -->
+  <div class="ex-info">
+    <div class="ex-info-top">
+      <span class="ex-cat">{{ product?.category?.cat_name }}</span>
+    </div>
+    <h3 class="ex-name">{{ product?.pname }}</h3>
+
+    <!-- Color dots -->
+    <div class="ex-color-dots" *ngIf="product?.colors && product.colors.length > 0">
+      <span
+        *ngFor="let c of product.colors"
+        class="ex-color-dot"
+        [style.background]="c.color ?? c"
+        [class.active]="selectedColor === (c.color ?? c)"
+        (click)="onColorSelect($event, c)"
+        [title]="c.color ?? c">
+      </span>
+    </div>
+
+    <!-- Price row -->
+    <div class="ex-price-row">
+      <div>
+        <span class="ex-price">₹{{ product?.price }}</span>
+        <span class="ex-price-old" *ngIf="product?.oldPrice">₹{{ product?.oldPrice }}</span>
+      </div>
+      <button class="ex-cart-btn" (click)="onAddToCart($event)" title="Add to cart">
+        <i class="fas fa-shopping-bag"></i>
+      </button>
+    </div>
+  </div>
+
+</div>

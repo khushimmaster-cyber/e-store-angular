@@ -472,6 +472,20 @@
   }
 }
 
+@media (max-width: 500px) {
+  .estore-category-container { padding: 10px 8px; }
+  .estore-category-header { padding: 16px; border-radius: 14px; }
+  .header-left h2 { font-size: 1.4rem; }
+  .estore-cat-img { width: 55px; height: 55px; border-radius: 10px; }
+  .estore-cat-img:hover { transform: scale(1.2); }
+  .estore-btn { width: 36px; height: 36px; font-size: 0.9rem; border-radius: 10px; }
+  .estore-category-table th,
+  .estore-category-table td { padding: 12px 10px; font-size: 0.82rem; }
+  .serial-badge { width: 26px; height: 26px; font-size: 0.85rem; }
+  .category-text { font-size: 0.9rem; }
+  .search-input { width: 180px; font-size: 0.85rem; }
+}
+
 /* ===== SCROLLBAR STYLING ===== */
 .estore-table-responsive::-webkit-scrollbar {
   height: 8px;

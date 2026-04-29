@@ -364,6 +364,16 @@
   }
 }
 
+@media (max-width: 500px) {
+  .add-product-container { padding: 10px 8px; }
+  .add-product-grid { grid-template-columns: 1fr; gap: 10px; }
+  .add-product-file-row { grid-template-columns: 1fr; }
+  .add-product-actions { flex-direction: column; padding: 12px; }
+  .add-product-group { padding: 10px; }
+  .add-product-header { padding: 10px 12px; }
+  .add-product-header span { font-size: 0.95rem; }
+}
+
 /* Color Picker Styles */
 .color-picker-list {
   display: flex;
@@ -433,8 +443,8 @@
 
 /* Color image preview */
 .color-img-preview {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid #d4c4b0;

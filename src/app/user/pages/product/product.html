@@ -6,12 +6,8 @@
         <div class="search-sort-row">
             <div class="search-bar-wrap">
                 <span class="search-icon">🔍</span>
-                <input
-                    type="text"
-                    class="product-search"
-                    placeholder="Search products..."
-                    [(ngModel)]="searchQuery"
-                />
+                <input type="text" class="product-search" placeholder="Search products..."
+                    [(ngModel)]="searchQuery" />
                 <button class="search-clear" *ngIf="searchQuery" (click)="searchQuery=''">✕</button>
             </div>
             <select class="sort-select" [(ngModel)]="sortBy">
@@ -29,28 +25,17 @@
     </p>
 
     <div class="grid-layout" *ngIf="filteredProducts.length > 0">
-        <div class="product-card" *ngFor="let p of filteredProducts">
-            <div class="img-container arch">
-                <img [src]="baseUrl + p.pic1" class="img-main" [alt]="p.pname">
-                <img [src]="baseUrl + p.picHover" class="img-hover" [alt]="p.pname">
-                <a [href]="'/productdetails/' + p._id" class="add-to-cart-btn">VIEW DETAILS</a>
-                <button class="wish-btn" (click)="toggleWishlist($event, p._id)"
-                    [ngClass]="{'active': isWishlisted(p._id)}">
-                    <i class="fas fa-heart"></i>
-                </button>
-            </div>
-            <div class="product-info">
-                <p class="category-tag">{{ p.category?.cat_name || 'Uncategorized' }}</p>
-                <h3 class="product-title">{{ p.pname }}</h3>
-                <div class="price-box">
-                    <span class="currency">₹</span>
-                    <span class="amount">{{ p.price }}</span>
-                </div>
-            </div>
-        </div>
+        <app-product-card
+            *ngFor="let p of filteredProducts"
+            [product]="p"
+            [selectedColor]="selectedColors[p._id] || ''"
+            (cardClicked)="navigateToDetails($event, p)"
+            (addToCart)="addToCart($event, p)"
+            (colorSelected)="selectColor($event.event, p._id, $event.color)">
+        </app-product-card>
     </div>
 
-    <div class="no-products" *ngIf="filteredProducts.length === 0">
+    <div class="no-products" *ngIf="filteredProducts.length === 0 && !loading">
         <div class="empty-icon">📦</div>
         <p>No products found in this category.</p>
         <a routerLink="/category" class="btn-back">Browse Categories</a>

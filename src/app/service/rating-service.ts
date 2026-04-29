@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class RatingService {
-  private url = 'http://localhost:3000/api/ratings';
+  private url = 'https://moska-backend-1.onrender.com/api/ratings';
 
   constructor(private http: HttpClient) {}
 

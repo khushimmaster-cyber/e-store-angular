@@ -57,7 +57,7 @@
             <td class="estore-category-image">
               <div class="image-wrapper">
                 <img
-                  [src]="'http://localhost:3000/uploads/' + category.cat_pic"
+                  [src]="category.cat_pic"
                   class="estore-cat-img"
                   alt="{{ category.cat_name }}"
                   (click)="viewImage(category.cat_pic); $event.stopPropagation()"

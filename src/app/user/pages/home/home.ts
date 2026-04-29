@@ -1,17 +1,17 @@
 import { Component, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ProductService } from '../../../service/product-service';
 import { CouponService } from '../../../service/coupon-service';
-import { NgFor, NgClass, NgIf } from '@angular/common';
+import { CartService } from '../../../service/cart-service';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatbotComponent } from '../../../chatbot/chatbot';
 import { Router, RouterLink } from '@angular/router';
-import { WishlistService } from '../../../service/wishlist-service';
 import { ThemeService } from '../../../service/theme-service';
 import { MSwal as Swal } from '../../../service/swal-service';
+import { ProductCardComponent } from '../../components/product-card/product-card';
 
 @Component({
   selector: 'app-home',
-  imports: [NgFor, NgClass, NgIf, FormsModule, ChatbotComponent, RouterLink],
+  imports: [NgFor, NgIf, FormsModule, RouterLink, ProductCardComponent],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
@@ -37,10 +37,10 @@ export class Home implements AfterViewInit, OnInit {
     if (sel && p.colors?.length) {
       const match = p.colors.find((c: any) => (c.color ?? c) === sel);
       if (match?.image && match.image !== 'no-image.jpg') {
-        return 'http://localhost:3000/uploads/' + match.image;
+        return 'https://moska-backend-1.onrender.com/uploads/' + match.image;
       }
     }
-    return 'http://localhost:3000/uploads/' + p.pic1;
+    return 'https://moska-backend-1.onrender.com/uploads/' + p.pic1;
   }
 
   navigateToDetails(e: Event, p: any) {
@@ -84,14 +84,13 @@ export class Home implements AfterViewInit, OnInit {
   userId = sessionStorage.getItem('id');
   userName = sessionStorage.getItem('name');
   dropdownOpen = false;
-  wishlisted = new Set<string>();
 
   constructor(
     private pservice: ProductService,
-    private couponService: CouponService, // ⭐ NEW
+    private couponService: CouponService,
+    private cartService: CartService,
     public router: Router,
     private cdr: ChangeDetectorRef,
-    public wishlistService: WishlistService,
     public themeService: ThemeService,
   ) {}
 
@@ -103,45 +102,16 @@ export class Home implements AfterViewInit, OnInit {
         this.pickRandom5Popular();
         this.cdr.detectChanges();
       },
-      error: (err) => console.log(err),
+      error: () => {},
     });
 
     // ⭐ LOAD POPULAR COUPONS
     this.couponService.getPopularCoupons().subscribe({
       next: (res: any) => {
-        console.log('Coupons API response:', res);
         this.coupons = Array.isArray(res) ? res : (res.data || []);
-        console.log('Coupons array:', this.coupons);
         this.cdr.detectChanges();
       },
-      error: (err) => console.log('Coupon error:', err),
-    });
-
-    if (this.userId) {
-      this.wishlistService.load(this.userId);
-      this.wishlistService.wishlistIds$.subscribe((ids) => {
-        this.wishlisted = ids;
-        this.cdr.detectChanges();
-      });
-    }
-  }
-
-  isWishlisted(id: string): boolean {
-    return this.wishlisted.has(id);
-  }
-
- 
-
-  toggleWishlist(event: Event, productId: string) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!this.userId) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    this.wishlistService.toggle(this.userId, productId).subscribe({
-      next: (res: any) =>
-        this.wishlistService.updateIds((res.data || []).map((id: any) => id.toString())),
+      error: () => {},
     });
   }
   copyCoupon(code: string) {
@@ -154,9 +124,20 @@ export class Home implements AfterViewInit, OnInit {
 
   addToCart(e: Event, p: any) {
     e.preventDefault(); e.stopPropagation();
-    Swal.fire({
-      icon: 'success', title: 'Added to Cart!', text: `${p.pname} added.`,
-      timer: 1500, showConfirmButton: false, toast: true, position: 'top-end'
+
+    const userId = sessionStorage.getItem('id');
+    if (!userId) { this.router.navigate(['/login']); return; }
+
+    this.cartService.addToCart({ userId, productId: p._id, quantity: 1 }).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success', title: 'Added to Cart!', text: `${p.pname} added.`,
+          timer: 1500, showConfirmButton: false, toast: true, position: 'top-end'
+        });
+      },
+      error: () => {
+        Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not add to cart.', confirmButtonColor: '#9B7B5E' });
+      }
     });
   }
 

@@ -398,6 +398,19 @@ app-validation-message {
   }
 }
 
+@media (max-width: 500px) {
+  .estore-edit-container { padding: 0 8px; }
+  .estore-edit-card { border-radius: 16px; }
+  .estore-edit-header { padding: 14px 16px; }
+  .header-content span { font-size: 1.1rem; }
+  .estore-edit-body { padding: 16px 14px; }
+  .estore-input { padding: 10px 14px; font-size: 0.9rem; border-radius: 10px; }
+  .estore-btn { padding: 12px 16px; font-size: 0.9rem; }
+  .estore-preview-img { width: 90px; height: 90px; }
+  .estore-file-zone { padding: 16px; border-radius: 14px; }
+  .estore-file-zone i { font-size: 1.8rem; }
+}
+
 /* Focus States */
 .estore-input:focus-visible {
   outline: 2px solid #b48d72;

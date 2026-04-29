@@ -345,3 +345,44 @@
 .admin-login-link     { font-size: 1.3rem; padding: 15px 38px; }
 .admin-login-link i   { font-size: 1.5rem; }
 .header-top           { height: 92px; }
+
+/* ── Admin Hamburger (mobile only) ── */
+.admin-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid rgba(155,123,94,0.3);
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  color: #4f3a2a;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+.admin-hamburger:hover {
+  background: rgba(155,123,94,0.1);
+  color: #9B7B5E;
+}
+
+@media (max-width: 768px) {
+  .admin-hamburger { display: flex; align-items: center; justify-content: center; }
+  .logo-badge { display: none; }
+  .header-container { padding: 0 1rem; }
+  .header-top { height: 60px; }
+  .logo { font-size: 1.3rem; }
+  .user-info { display: none; }
+  .notif-dropdown { right: -60px; width: 300px; }
+}
+
+@media (max-width: 500px) {
+  .header-container { padding: 0 0.6rem; }
+  .header-top { height: 54px; flex-wrap: nowrap; gap: 6px; }
+  .logo { font-size: 1.1rem; }
+  .logo i { font-size: 1.2rem; }
+  .logo-sub { display: none; }
+  .action-icon { width: 36px; height: 36px; font-size: 0.95rem; }
+  .action-icon i { font-size: 1.1rem; }
+  .user-avatar { width: 34px; height: 34px; }
+  .user-profile { padding: 4px 8px 4px 4px; margin-left: 4px; }
+  .notif-dropdown { right: -80px; width: 260px; }
+  .header-actions { gap: 4px; }
+}

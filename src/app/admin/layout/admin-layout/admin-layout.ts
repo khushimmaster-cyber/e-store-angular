@@ -12,6 +12,8 @@ import { ThemeService } from '../../../service/theme-service';
   styleUrl: './admin-layout.css',
 })
 export class AdminLayout implements OnInit, OnDestroy {
+  sidebarOpen = false;
+
   constructor(private themeService: ThemeService) {}
 
   ngOnInit() {
@@ -20,5 +22,13 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.themeService.restoreUserTheme();
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar() {
+    this.sidebarOpen = false;
   }
 }

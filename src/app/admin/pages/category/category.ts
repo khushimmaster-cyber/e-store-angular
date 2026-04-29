@@ -32,13 +32,12 @@ export class Category implements OnInit {
   loadCategories() {
     this.categoryService.get().subscribe({
       next: (res: any) => {
-        this.categories = res;
-        this.filteredCategories = [...res];
-        this.cdr.detectChanges(); 
-        console.log('✅ Categories loaded:', this.categories);
-        console.log('First category:', this.categories[0]);
+        const data = res?.data ?? res;
+        this.categories = data;
+        this.filteredCategories = [...data];
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('❌ Error loading categories:', err)
+      error: (err) => {}
     });
   }
 
@@ -54,12 +53,11 @@ export class Category implements OnInit {
   }
 
   viewImage(imagePath: string) {
-    console.log('🖼️ Image clicked!');
-    console.log('Image path:', imagePath);
-    this.selectedImage = 'http://localhost:3000/uploads/' + imagePath;
+    // Cloudinary URLs are full URLs; legacy filenames need the uploads prefix
+    this.selectedImage = imagePath?.startsWith('http')
+      ? imagePath
+      : 'https://moska-backend-1.onrender.com/uploads/' + imagePath;
     this.showImageModal = true;
-    console.log('Modal should show:', this.showImageModal);
-    console.log('Selected image:', this.selectedImage);
   }
 
   closeImageModal() {
@@ -68,9 +66,6 @@ export class Category implements OnInit {
   }
 
   editCategory(id: string) {
-    console.log('🔵 Edit button clicked!');
-    console.log('🔵 Category ID:', id);
-    console.log('🔵 Navigating to: /admin/editcategory/' + id);
     this.router.navigate(['/admin/editcategory', id]);
   }
 
@@ -87,7 +82,6 @@ export class Category implements OnInit {
             this.loadCategories();
           },
           error: (err) => {
-            console.error('Delete error:', err);
             Swal.fire({ icon: 'error', title: 'Failed', text: 'Failed to delete category', confirmButtonColor: '#9B7B5E' });
           }
         });

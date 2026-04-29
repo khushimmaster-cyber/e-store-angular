@@ -419,7 +419,7 @@ tbody tr:hover {
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .charts-grid {
@@ -427,11 +427,62 @@ tbody tr:hover {
   }
 
   .table-container {
-    overflow-x: scroll;
+    overflow-x: auto;
   }
 
   table {
-    min-width: 600px;
+    min-width: 500px;
+  }
+}
+
+@media (max-width: 500px) {
+  .dashboard-container {
+    padding: 10px 8px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 22px;
+  }
+
+  .charts-section {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 480px;
+  }
+
+  th, td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .product-cell img {
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -525,6 +576,21 @@ tbody tr:hover {
 @media (max-width: 900px) {
   .charts-section {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .charts-section {
+    gap: 12px;
+  }
+  .chart-card {
+    padding: 16px 14px;
+  }
+  .chart-body {
+    height: 200px;
+  }
+  .donut-body {
+    height: 220px;
   }
 }
 

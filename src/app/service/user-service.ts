@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 })
 export class UserService {
 
-  url="http://localhost:3000/api/"
+  url="https://moska-backend-1.onrender.com/api/"
 
   constructor(private http:HttpClient){}
 

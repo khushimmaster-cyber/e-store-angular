@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { NgIf, NgFor, CommonModule } from '@angular/common';
+import { CloudinaryUploadService } from '../../../service/cloudinary-upload.service';
 import { MSwal as Swal } from '../../../service/swal-service';
+import { forkJoin, of } from 'rxjs';
 
 @Component({
   selector: 'app-edit-product',
@@ -13,34 +15,39 @@ import { MSwal as Swal } from '../../../service/swal-service';
   styleUrls: ['./edit-product.css']
 })
 export class EditProduct implements OnInit {
+
   productForm!: FormGroup;
   productId!: string;
   categories: any[] = [];
-  
-  mainFile!: File;
-  hoverFile!: File;
-  mainFileName: string = '';
+  uploading = false;
+
+  mainFile:      File | null = null;
+  hoverFile:     File | null = null;
+  mainFileName:  string = '';
   hoverFileName: string = '';
-  currentMainImage: string = '';
+
+  currentMainImage:  string = '';
   currentHoverImage: string = '';
-  colorList: { color: string; image: File | null; preview: string; existingImage: string }[] = [
-    { color: '#000000', image: null, preview: '', existingImage: '' }
+
+  colorList: { color: string; file: File | null; preview: string; existingImage: string }[] = [
+    { color: '#000000', file: null, preview: '', existingImage: '' }
   ];
-  
-  baseUrl = 'http://localhost:3000';
+
+  readonly baseUrl = 'https://moska-backend-1.onrender.com';
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private cloudinary: CloudinaryUploadService
   ) {
     this.productForm = this.fb.group({
-      pname: ['', Validators.required],
-      category: ['', Validators.required],
-      price: ['', [Validators.required, Validators.min(1)]],
-      oldPrice: [''],
-      stock: [0, [Validators.min(0)]],
+      pname:       ['', Validators.required],
+      category:    ['', Validators.required],
+      price:       ['', [Validators.required, Validators.min(1)]],
+      oldPrice:    [''],
+      stock:       [0, [Validators.min(0)]],
       description: ['', Validators.required]
     });
   }
@@ -52,54 +59,45 @@ export class EditProduct implements OnInit {
   }
 
   loadCategories() {
-    const defaultCategories = [
-      { _id: '', cat_name: 'Clothes' },
-      { _id: '', cat_name: 'Beauty' },
-      { _id: '', cat_name: 'Medicine' },
-      { _id: '', cat_name: 'Electronic Item' },
-      { _id: '', cat_name: 'Toy' },
-      { _id: '', cat_name: 'Jewellery' }
-    ];
-
     this.http.get<any>(`${this.baseUrl}/api/categories/all`).subscribe({
-      next: (res: any) => {
-        this.categories = res && res.length > 0 ? res : defaultCategories;
-      },
-      error: () => {
-        this.categories = defaultCategories;
-      }
+      next: (res: any) => { this.categories = res?.data ?? res; },
+      error: () => { this.categories = []; }
     });
+  }
+
+  // Cloudinary URLs pass through; legacy filenames get the /uploads/ prefix
+  resolveImage(pic: string): string {
+    if (!pic || pic === 'no-image.jpg') return '';
+    if (pic.startsWith('http')) return pic;
+    return `${this.baseUrl}/uploads/${pic}`;
   }
 
   loadProduct() {
     this.http.get<any>(`${this.baseUrl}/api/products/get/${this.productId}`).subscribe({
       next: (res: any) => {
-        const product = res.data;
-        
+        const p = res.data;
         this.productForm.patchValue({
-          pname: product.pname,
-          category: product.category?.cat_name || product.category,
-          price: product.price,
-          oldPrice: product.oldPrice || '',
-          stock: product.stock || 0,
-          description: product.description
+          pname:       p.pname,
+          category:    p.category?._id || p.category,
+          price:       p.price,
+          oldPrice:    p.oldPrice || '',
+          stock:       p.stock || 0,
+          description: p.description
         });
 
-        this.colorList = (product.colors && product.colors.length > 0)
-          ? product.colors.map((c: any) => ({
-              color: c.color ?? c,
-              image: null,
-              preview: '',
-              existingImage: c.image && c.image !== 'no-image.jpg'
-                ? `${this.baseUrl}/uploads/${c.image}` : ''
+        this.currentMainImage  = this.resolveImage(p.pic1);
+        this.currentHoverImage = this.resolveImage(p.picHover);
+
+        this.colorList = (p.colors && p.colors.length > 0)
+          ? p.colors.map((c: any) => ({
+              color:         c.color ?? c,
+              file:          null,
+              preview:       '',
+              existingImage: this.resolveImage(c.image)
             }))
-          : [{ color: '#000000', image: null, preview: '', existingImage: '' }];
-        
-        this.currentMainImage = `${this.baseUrl}/uploads/${product.pic1}`;
-        this.currentHoverImage = `${this.baseUrl}/uploads/${product.picHover}`;
+          : [{ color: '#000000', file: null, preview: '', existingImage: '' }];
       },
-      error: (err) => {
-        console.error('Error loading product:', err);
+      error: () => {
         Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Failed to load product', confirmButtonColor: '#9B7B5E' });
       }
     });
@@ -108,38 +106,39 @@ export class EditProduct implements OnInit {
   onMainFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.mainFile = event.target.files[0];
-      this.mainFileName = this.mainFile.name;
-      
+      this.mainFileName = this.mainFile!.name;
       const reader = new FileReader();
-      reader.onload = () => {
-        this.currentMainImage = reader.result as string;
-      };
-      reader.readAsDataURL(this.mainFile);
+      reader.onload = () => { this.currentMainImage = reader.result as string; };
+      reader.readAsDataURL(this.mainFile!);
     }
   }
 
   onHoverFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.hoverFile = event.target.files[0];
-      this.hoverFileName = this.hoverFile.name;
+      this.hoverFileName = this.hoverFile!.name;
       const reader = new FileReader();
       reader.onload = () => { this.currentHoverImage = reader.result as string; };
-      reader.readAsDataURL(this.hoverFile);
+      reader.readAsDataURL(this.hoverFile!);
     }
   }
 
-  addColor() { this.colorList.push({ color: '#000000', image: null, preview: '', existingImage: '' }); }
+  addColor() {
+    this.colorList.push({ color: '#000000', file: null, preview: '', existingImage: '' });
+  }
 
   removeColor(index: number) {
     if (this.colorList.length > 1) this.colorList.splice(index, 1);
   }
 
-  updateColor(index: number, value: string) { this.colorList[index].color = value; }
+  updateColor(index: number, value: string) {
+    this.colorList[index].color = value;
+  }
 
   onColorImageChange(index: number, event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.colorList[index].image = file;
+      this.colorList[index].file = file;
       const reader = new FileReader();
       reader.onload = () => { this.colorList[index].preview = reader.result as string; };
       reader.readAsDataURL(file);
@@ -147,38 +146,59 @@ export class EditProduct implements OnInit {
   }
 
   onSubmit() {
-    if (this.productForm.valid) {
-      const formData = new FormData();
-      formData.append('pname', this.productForm.value.pname);
-      formData.append('category', this.productForm.value.category);
-      formData.append('price', this.productForm.value.price);
-      formData.append('description', this.productForm.value.description);
-      formData.append('stock', this.productForm.value.stock || '0');
-      
-      if (this.productForm.value.oldPrice) {
-        formData.append('oldPrice', this.productForm.value.oldPrice);
-      }
-
-      this.colorList.forEach(c => {
-        formData.append('colors[]', c.color);
-        if (c.image) formData.append('colorImages', c.image);
-      });
-
-      if (this.mainFile) formData.append('pic', this.mainFile);
-      if (this.hoverFile) formData.append('picHover', this.hoverFile);
-
-      this.http.put(`${this.baseUrl}/api/products/update/${this.productId}`, formData).subscribe({
-        next: (res: any) => {
-          Swal.fire({ icon: 'success', title: 'Product Updated!', timer: 1500, showConfirmButton: false })
-            .then(() => this.router.navigate(['/admin/showproduct']));
-        },
-        error: (err) => {
-          console.error('Update error:', err);
-          Swal.fire({ icon: 'error', title: 'Update Failed', text: 'Failed to update product', confirmButtonColor: '#9B7B5E' });
-        }
-      });
-    } else {
+    if (!this.productForm.valid) {
       Swal.fire({ icon: 'warning', title: 'Incomplete', text: 'Please fill all required fields', confirmButtonColor: '#9B7B5E' });
+      return;
     }
+
+    this.uploading = true;
+
+    // Upload only new images to Cloudinary in parallel
+    const mainUpload$  = this.mainFile  ? this.cloudinary.upload(this.mainFile)  : of(null);
+    const hoverUpload$ = this.hoverFile ? this.cloudinary.upload(this.hoverFile) : of(null);
+    const colorUploads$ = this.colorList.map(c =>
+      c.file ? this.cloudinary.upload(c.file) : of(null)
+    );
+
+    forkJoin([mainUpload$, hoverUpload$, ...colorUploads$]).subscribe({
+      next: (results: any[]) => {
+        const [mainRes, hoverRes, ...colorResults] = results;
+
+        const body: any = {
+          pname:       this.productForm.value.pname,
+          category:    this.productForm.value.category,
+          price:       this.productForm.value.price,
+          description: this.productForm.value.description,
+          stock:       this.productForm.value.stock || 0,
+        };
+
+        if (this.productForm.value.oldPrice) body.oldPrice = this.productForm.value.oldPrice;
+        if (mainRes)  body.pic      = mainRes.secure_url;
+        if (hoverRes) body.picHover = hoverRes.secure_url;
+
+        // Colors — send hex + resolved URLs (new upload or keep existing)
+        body['colors[]'] = this.colorList.map(c => c.color);
+        body['colorImages[]'] = colorResults.map((r, i) =>
+          r?.secure_url || this.colorList[i].existingImage || ''
+        );
+
+        this.http.put(`${this.baseUrl}/api/products/update/${this.productId}`, body).subscribe({
+          next: () => {
+            this.uploading = false;
+            Swal.fire({ icon: 'success', title: 'Product Updated!', timer: 1500, showConfirmButton: false })
+              .then(() => this.router.navigate(['/admin/showproduct']));
+          },
+          error: () => {
+            this.uploading = false;
+            Swal.fire({ icon: 'error', title: 'Update Failed', text: 'Failed to update product', confirmButtonColor: '#9B7B5E' });
+          }
+        });
+      },
+      error: (err) => {
+        this.uploading = false;
+        console.error('Cloudinary upload error:', err);
+        Swal.fire({ icon: 'error', title: 'Upload Failed', text: 'Image upload to Cloudinary failed. Check your upload preset.', confirmButtonColor: '#9B7B5E' });
+      }
+    });
   }
 }

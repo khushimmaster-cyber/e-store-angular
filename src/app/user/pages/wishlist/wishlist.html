@@ -3,29 +3,76 @@
   <div class="page-header">
     <a routerLink="/profile" class="back-btn"><i class="fas fa-arrow-left"></i></a>
     <h1>My Wishlist</h1>
-    <span class="count">{{ products.length }} items</span>
+    <span class="count">{{ (products$ | async)?.length ?? 0 }} items</span>
   </div>
 
-  <div class="empty-state" *ngIf="products.length === 0">
-    <i class="fas fa-heart-broken"></i>
-    <p>Your wishlist is empty</p>
-    <a routerLink="/" class="btn-shop">Start Shopping</a>
-  </div>
+  <ng-container *ngIf="products$ | async as products">
 
-  <div class="wishlist-grid" *ngIf="products.length > 0">
-    <div class="wish-card" *ngFor="let p of products">
-      <a [routerLink]="['/productdetails', p._id]">
-        <img [src]="imageUrl + p.pic1" [alt]="p.pname"
-             onerror="this.src='https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300'">
-      </a>
-      <div class="wish-info">
-        <h4>{{ p.pname }}</h4>
-        <span class="price">₹{{ p.price }}</span>
-      </div>
-      <button class="btn-remove" (click)="remove(p._id)">
-        <i class="fas fa-heart"></i>
-      </button>
+    <div class="empty-state" *ngIf="products.length === 0">
+      <i class="fas fa-heart-broken"></i>
+      <p>Your wishlist is empty</p>
+      <a routerLink="/" class="btn-shop">Start Shopping</a>
     </div>
-  </div>
+
+    <div class="wishlist-grid" *ngIf="products.length > 0">
+
+      <div class="ex-card" *ngFor="let p of products" (click)="goToDetails(p._id)">
+
+        <!-- Image wrapper -->
+        <div class="ex-img-wrap">
+          <img [src]="resolveImage(p.pic1)" [alt]="p.pname" class="ex-img-main"
+               onerror="this.src='https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300'">
+          <img [src]="resolveImage(p.picHover || p.pic1)" [alt]="p.pname" class="ex-img-hover"
+               onerror="this.src='https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300'">
+
+          <!-- Popular badge -->
+          <span class="ex-badge" *ngIf="p.popular">⭐ Popular</span>
+
+          <!-- Hover overlay -->
+          <div class="ex-overlay">
+            <a class="ex-view-btn" (click)="goToDetails(p._id); $event.stopPropagation()">
+              <i class="fas fa-eye"></i> View
+            </a>
+          </div>
+        </div>
+
+        <!-- Wishlist / Remove button -->
+        <button class="ex-wish-btn active" (click)="remove(p._id); $event.stopPropagation()" title="Remove from wishlist">
+          <i class="fas fa-heart"></i>
+        </button>
+
+        <!-- Card info -->
+        <div class="ex-info">
+          <div class="ex-info-top">
+            <span class="ex-cat">{{ p.category?.cat_name }}</span>
+          </div>
+          <h3 class="ex-name">{{ p.pname }}</h3>
+
+          <!-- Color dots -->
+          <div class="ex-color-dots" *ngIf="p.colors && p.colors.length > 0">
+            <span
+              *ngFor="let c of p.colors"
+              class="ex-color-dot"
+              [style.background]="c.color ?? c"
+              [title]="c.color ?? c">
+            </span>
+          </div>
+
+          <!-- Price row -->
+          <div class="ex-price-row">
+            <div>
+              <span class="ex-price">₹{{ p.price }}</span>
+              <span class="ex-price-old" *ngIf="p.oldPrice">₹{{ p.oldPrice }}</span>
+            </div>
+            <button class="ex-cart-btn" (click)="addToCart(p); $event.stopPropagation()" title="Add to cart">
+              <i class="fas fa-shopping-bag"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
 
 </div>

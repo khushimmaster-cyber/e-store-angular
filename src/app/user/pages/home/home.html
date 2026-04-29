@@ -107,41 +107,14 @@
             {{ filteredProducts.length }} result{{ filteredProducts.length !== 1 ? 's' : '' }} for "{{ searchQuery }}"
         </p>
         <div class="grid-layout">
-            <div class="ex-card" *ngFor="let p of filteredProducts">
-                <div class="ex-img-wrap">
-                    <img [src]="getCardImage(p)" class="ex-img-main" [alt]="p.pname">
-                    <img [src]="'http://localhost:3000/uploads/'+p.picHover" class="ex-img-hover" [alt]="p.pname">
-                    <div class="ex-overlay">
-                        <a (click)="navigateToDetails($event, p)" class="ex-view-btn" style="cursor:pointer">View Details</a>
-                    </div>
-                    <span class="popular-badge" *ngIf="p.popular">⭐ Popular</span>
-                </div>
-                <button class="ex-wish-btn" (click)="toggleWishlist($event, p._id)"
-                    [ngClass]="{'active': isWishlisted(p._id)}">
-                    <i class="fas fa-heart"></i>
-                </button>
-                <div class="ex-info">
-                    <span class="ex-cat">{{ p.category?.cat_name }}</span>
-                    <h3 class="ex-name">{{ p.pname }}</h3>
-                    <!-- Color dots -->
-                    <div class="ex-color-dots" *ngIf="p.colors && p.colors.length > 0">
-                        <span
-                            *ngFor="let c of p.colors"
-                            class="ex-color-dot"
-                            [style.background]="c.color ?? c"
-                            [class.active]="selectedColors[p._id] === (c.color ?? c)"
-                            (click)="selectColor($event, p._id, c)"
-                            [title]="c.color ?? c">
-                        </span>
-                    </div>
-                    <div class="ex-price-row">
-                        <span class="ex-price">₹{{ p.price }}</span>
-                        <button class="ex-cart-btn" (click)="addToCart($event, p)">
-                            <i class="fas fa-shopping-bag"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <app-product-card
+                *ngFor="let p of filteredProducts"
+                [product]="p"
+                [selectedColor]="selectedColors[p._id] || ''"
+                (cardClicked)="navigateToDetails($event, p)"
+                (addToCart)="addToCart($event, p)"
+                (colorSelected)="selectColor($event.event, p._id, $event.color)">
+            </app-product-card>
         </div>
         <!-- View All button removed - only 5 popular products shown -->
         <div class="view-all-wrap" *ngIf="!searchQuery">
@@ -151,6 +124,5 @@
 </section>
 
 
-<app-chatbot />
 <!-- footer -->
 <!-- ===== PROFESSIONAL CREATIVE FOOTER (MATCHES CATEGORY STYLE) ===== -->

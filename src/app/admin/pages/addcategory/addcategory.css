@@ -344,6 +344,16 @@ app-validation-message {
   }
 }
 
+@media (max-width: 500px) {
+  .estore-container { padding: 0 8px; }
+  .estore-card { border-radius: 16px; }
+  .estore-card-header { padding: 14px 16px; font-size: 1.1rem; }
+  .estore-card-body { padding: 16px 14px; }
+  .estore-input { padding: 10px 14px; font-size: 0.9rem; border-radius: 10px; }
+  .estore-btn { padding: 12px 16px; font-size: 0.9rem; }
+  .estore-categories { border-radius: 16px; padding: 10px; }
+}
+
 /* Focus States for Accessibility */
 .estore-input:focus-visible {
   outline: 2px solid #b48d72;

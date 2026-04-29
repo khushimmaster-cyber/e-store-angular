@@ -1,6 +1,7 @@
-import { Component, signal, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, signal, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { ThemeService } from './service/theme-service';
+import { WishlistService } from './service/wishlist-service';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { MSwal as Swal } from './service/swal-service';
@@ -38,12 +39,20 @@ Object.assign(Swal, MoskaSwal);
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements AfterViewInit, OnDestroy {
+export class App implements AfterViewInit, OnDestroy, OnInit {
   protected readonly title = signal('major-app');
   private observer!: IntersectionObserver;
   private routerSub!: Subscription;
 
-  constructor(private themeService: ThemeService, private router: Router) {}
+  constructor(
+    private themeService: ThemeService,
+    private router: Router,
+    private wishlistService: WishlistService,
+  ) {}
+
+  ngOnInit() {
+    this.wishlistService.loadWishlist();
+  }
 
   ngAfterViewInit(): void {
     this.initScrollReveal();

@@ -31,13 +31,10 @@ body, .admin-layout {
     z-index: 1000;
 }
 .main-content{
-  /* margin-left:260px;   sidebar width */
-  margin-top:90px;     /* header height */
-  padding:20px;
-  min-height:calc(100vh - 110px);
-    padding-bottom:70px;
-    /* justify-content: center;
-    display: flex; */
+  margin-top: 0;
+  padding: 20px;
+  min-height: calc(100vh - 92px - 50px);
+  padding-bottom: 70px;
 }
 
 .page-container{
@@ -53,16 +50,7 @@ body, .admin-layout {
     /* height: 100vh; */
 }
 
-/* Header */
-.admin-header {
-    position: fixed;
-    top: 0;
-    left: 280px; /* sidebar width */
-    width: calc(100% - 280px);
-    height: 60px; /* header height */
-    z-index: 1001;
-    background: rgba(255, 252, 248, 0.85);
-}
+/* Header — handled by header component (position: sticky) */
 
 /* Content */
 
@@ -81,4 +69,63 @@ body, .admin-layout {
     text-align: center;
     line-height: 50px;         /* vertical center */
     z-index: 1000;             /* header ke neeche, sidebar ke upar */
+}
+
+/* ── Mobile sidebar overlay ── */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1100;   /* above header (1001), below sidebar (1200) */
+  backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+
+.admin-sidebar-overlay.show {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .main-area {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  .admin-header {
+    left: 0 !important;
+    width: 100% !important;
+  }
+  .admin-footer {
+    left: 0 !important;
+    width: 100% !important;
+  }
+  .main-content {
+    margin-top: 0 !important;
+    padding: 14px !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .main-content {
+    margin-top: 0 !important;
+    padding: 10px !important;
+  }
+  .admin-footer {
+    font-size: 0.75rem;
+    height: 40px;
+    line-height: 40px;
+  }
+}
+
+/* ── DARK MODE — ADMIN LAYOUT ── */
+:host-context([data-theme="dark"]) .main-area {
+  background: #0f0d0b;
+}
+:host-context([data-theme="dark"]) .main-content {
+  background: #0f0d0b;
+}
+:host-context([data-theme="dark"]) .admin-footer {
+  background: #141210 !important;
+  border-top-color: rgba(255,255,255,0.06) !important;
+  color: rgba(212,196,181,0.4) !important;
 }

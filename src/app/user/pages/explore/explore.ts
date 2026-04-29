@@ -1,24 +1,24 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../../service/product-service';
 import { CategoryService } from '../../../service/category-service';
-import { WishlistService } from '../../../service/wishlist-service';
+import { CartService } from '../../../service/cart-service';
 import { MSwal as Swal } from '../../../service/swal-service';
+import { ProductCardComponent } from '../../components/product-card/product-card';
 
 @Component({
   selector: 'app-explore',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ProductCardComponent],
   templateUrl: './explore.html',
   styleUrls: ['./explore.css'],
 })
 export class Explore implements OnInit {
   allProducts: any[] = [];
   categories: any[] = [];
-  wishlisted = new Set<string>();
-  selectedColors: Record<string, string> = {}; // productId -> selected color hex
+  selectedColors: Record<string, string> = {};
 
   // Filters
   searchQuery   = '';
@@ -35,22 +35,27 @@ export class Explore implements OnInit {
   constructor(
     private pService: ProductService,
     private catService: CategoryService,
-    public wishlistService: WishlistService,
+    private cartService: CartService,
     private cdr: ChangeDetectorRef,
     public router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
+    // read category from queryParam (e.g. from footer click)
+    this.route.queryParams.subscribe(params => {
+      if (params['cat']) this.selectedCat = params['cat'];
+    });
+
     this.catService.get().subscribe({
-      next: (res: any) => { this.categories = res; this.cdr.detectChanges(); },
+      next: (res: any) => { this.categories = res?.data ?? res; this.cdr.detectChanges(); },
       error: () => {}
     });
 
     this.pService.getAllProducts().subscribe({
       next: (res: any) => {
-        this.allProducts = res.data || [];
-        // set max price from data
-        const prices = this.allProducts.map(p => +p.price).filter(Boolean);
+        this.allProducts = res?.data ?? res ?? [];
+        const prices = this.allProducts.map((p: any) => +p.price).filter(Boolean);
         if (prices.length) {
           this.priceMax = Math.ceil(Math.max(...prices) / 100) * 100;
           this.maxPrice = this.priceMax;
@@ -60,25 +65,14 @@ export class Explore implements OnInit {
       },
       error: () => { this.loading = false; }
     });
-
-    if (this.userId) {
-      this.wishlistService.load(this.userId);
-      this.wishlistService.wishlistIds$.subscribe(ids => {
-        this.wishlisted = ids;
-        this.cdr.detectChanges();
-      });
-    }
   }
-
   get filtered(): any[] {
     let list = [...this.allProducts];
 
-    // category filter
     if (this.selectedCat) {
       list = list.filter(p => p.category?._id === this.selectedCat || p.category?.cat_name === this.selectedCat);
     }
 
-    // search
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
       list = list.filter(p =>
@@ -88,10 +82,11 @@ export class Explore implements OnInit {
       );
     }
 
-    // price range
-    list = list.filter(p => +p.price >= this.minPrice && +p.price <= this.maxPrice);
+    // only apply price filter if user has changed the slider
+    if (this.maxPrice < this.priceMax || this.minPrice > 0) {
+      list = list.filter(p => +p.price >= this.minPrice && +p.price <= this.maxPrice);
+    }
 
-    // sort
     switch (this.sortBy) {
       case 'price-asc':  list.sort((a, b) => +a.price - +b.price); break;
       case 'price-desc': list.sort((a, b) => +b.price - +a.price); break;
@@ -104,6 +99,10 @@ export class Explore implements OnInit {
 
   get totalResults() { return this.filtered.length; }
 
+  get selectedCatName(): string {
+    return this.categories.find(c => c._id === this.selectedCat)?.cat_name || 'Category';
+  }
+
   clearFilters() {
     this.searchQuery = '';
     this.selectedCat = '';
@@ -112,26 +111,36 @@ export class Explore implements OnInit {
     this.maxPrice = this.priceMax;
   }
 
-  isWishlisted(id: string) { return this.wishlisted.has(id); }
+  isWishlisted(id: string) { return false; } // kept for template compat — card handles it
 
   toggleWishlist(e: Event, id: string) {
     e.preventDefault(); e.stopPropagation();
-    if (!this.userId) { this.router.navigate(['/login']); return; }
-    this.wishlistService.toggle(this.userId, id).subscribe({
-      next: (res: any) =>
-        this.wishlistService.updateIds((res.data || []).map((i: any) => i.toString())),
-    });
   }
 
   addToCart(e: Event, p: any) {
     e.preventDefault(); e.stopPropagation();
-    Swal.fire({
-      icon: 'success', title: 'Added to Cart!', text: `${p.pname} added.`,
-      timer: 1500, showConfirmButton: false, toast: true, position: 'top-end'
+
+    const userId = sessionStorage.getItem('id');
+    if (!userId) { this.router.navigate(['/login']); return; }
+
+    this.cartService.addToCart({ userId, productId: p._id, quantity: 1 }).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success', title: 'Added to Cart!', text: `${p.pname} added.`,
+          timer: 1500, showConfirmButton: false, toast: true, position: 'top-end'
+        });
+      },
+      error: () => {
+        Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not add to cart.', confirmButtonColor: '#9B7B5E' });
+      }
     });
   }
 
-  imgUrl(pic: string) { return `http://localhost:3000/uploads/${pic}`; }
+  imgUrl(pic: string): string {
+    if (!pic || pic === 'no-image.jpg') return '';
+    if (pic.startsWith('http')) return pic;
+    return `https://moska-backend-1.onrender.com/uploads/${pic}`;
+  }
 
   selectColor(e: Event, productId: string, colorObj: any) {
     e.preventDefault(); e.stopPropagation();

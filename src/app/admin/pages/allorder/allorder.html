@@ -47,7 +47,7 @@
         <!-- ITEMS -->
         <div class="order-items">
             <div class="order-item" *ngFor="let item of order.items">
-                <img [src]="imageUrl + item.productId?.pic1"
+                <img [src]="resolveImage(item.productId?.pic1)"
                      [alt]="item.productId?.pname"
                      onerror="this.src='https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=80'">
                 <div class="item-info">

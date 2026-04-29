@@ -12,6 +12,7 @@ import { ThemeService } from '../../../service/theme-service';
 export class Header implements OnInit {
 
   dropdownOpen = false;
+  mobileMenuOpen = false;
   userId: string | null = null;
   isScrolled = false;
 
@@ -29,11 +30,21 @@ export class Header implements OnInit {
   @HostListener('document:click')
   onDocumentClick() {
     this.dropdownOpen = false;
+    this.mobileMenuOpen = false;
   }
 
   toggleDropdown(e: Event) {
     e.stopPropagation();
     this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  toggleMobileMenu(e: Event) {
+    e.stopPropagation();
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
   }
 
   closeDropdown() {
@@ -44,6 +55,7 @@ export class Header implements OnInit {
     sessionStorage.clear();
     this.userId = null;
     this.dropdownOpen = false;
+    this.mobileMenuOpen = false;
     this.router.navigate(['/login']);
   }
 }

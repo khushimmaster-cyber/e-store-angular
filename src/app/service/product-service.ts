@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class ProductService {
-  url = "http://localhost:3000/api/products"; // backend base URL
+  url = "https://moska-backend-1.onrender.com/api/products"; // backend base URL
 
   constructor(private http: HttpClient) { }
 
